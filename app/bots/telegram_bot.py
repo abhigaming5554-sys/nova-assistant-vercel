@@ -3,6 +3,7 @@ import telebot
 from dotenv import load_dotenv
 
 from app.modules.local_ai import ask_local_ai
+from app.video.script_generator import generate_video_script
 
 load_dotenv()
 
@@ -12,25 +13,42 @@ OWNER_ID = int(os.getenv("OWNER_TELEGRAM_ID", "0"))
 bot = telebot.TeleBot(TOKEN)
 
 
+# 🚀 Start command
 @bot.message_handler(commands=["start"])
 def start(message):
     if message.from_user.id != OWNER_ID:
         bot.reply_to(message, "⛔ Access denied")
         return
 
-    bot.reply_to(message, "🤖 Nova online hai 😄")
+    bot.reply_to(message, "🤖 Nova online hai 😄🔥")
 
 
+# 💬 Main message handler
 @bot.message_handler(func=lambda m: True)
 def handle(message):
     if message.from_user.id != OWNER_ID:
         return
 
-    user_text = message.text
+    text = message.text.strip()
 
-    bot.reply_to(message, "🧠 Soch rahi hoon...")
+    # 🎬 Video script command
+    if text.lower().startswith("/video "):
+        topic = text[7:]
 
-    reply = ask_local_ai(user_text)
+        bot.reply_to(
+            message,
+            "🎬 Nova tumhare video ke liye cinematic script bana rahi hai... 😄🔥"
+        )
+
+        result = generate_video_script(topic)
+
+        bot.reply_to(message, result)
+        return
+
+    # 🤖 Normal AI chat
+    bot.reply_to(message, "🤖 Nova soch rahi hai... 😄")
+
+    reply = ask_local_ai(text)
 
     bot.reply_to(message, reply)
 

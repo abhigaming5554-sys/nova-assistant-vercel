@@ -1,8 +1,3 @@
-SpeechRecognition
-pyttsx3
-pyaudio
-pyautogui
-psutil
-colorama
+pytelegrambotapi
 python-dotenv
 requests

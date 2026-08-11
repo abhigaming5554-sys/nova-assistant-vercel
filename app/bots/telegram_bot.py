@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN")
+
+if not TOKEN:
+    raise ValueError("❌ BOT_TOKEN environment variable not found")
 OWNER_ID = int(os.getenv("OWNER_TELEGRAM_ID", "0"))
 
 bot = telebot.TeleBot(TOKEN)

@@ -1,3 +1,4 @@
 pytelegrambotapi
 python-dotenv
 requests
+edge-tts

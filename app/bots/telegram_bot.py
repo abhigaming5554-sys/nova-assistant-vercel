@@ -2,48 +2,35 @@ import os
 import telebot
 from dotenv import load_dotenv
 
-from app.modules.local_ai import ask_local_ai
-from app.core.command_router import route
-
-# .env load karo
 load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN")
-OWNER_ID = int(os.getenv("OWNER_TELEGRAM_ID"))
+OWNER_ID = int(os.getenv("OWNER_TELEGRAM_ID", "0"))
 
 bot = telebot.TeleBot(TOKEN)
 
 
-def is_owner(message):
-    return message.from_user.id == OWNER_ID
-
-
 @bot.message_handler(commands=['start'])
 def start(message):
-    if not is_owner(message):
+    if message.from_user.id != OWNER_ID:
         bot.reply_to(message, "⛔ Access denied")
         return
 
     bot.reply_to(
         message,
-        "🤖 Nova online hai 😄\nRemote AI assistant ready!"
+        "🤖 Nova Railway par successfully online hai 😄🔥"
     )
 
 
 @bot.message_handler(func=lambda m: True)
 def handle(message):
-    if not is_owner(message):
+    if message.from_user.id != OWNER_ID:
         return
 
-    text = message.text.lower()
+    text = message.text
 
-    # Computer commands execute karo
-    route(text)
-
-    # AI reply generate karo
-    reply = ask_local_ai(text)
-
-    bot.reply_to(message, reply)
+    # Simple AI-style reply
+    bot.reply_to(message, f"🧠 Nova: Tumne bola → {text}")
 
 
 def start_telegram_bot():

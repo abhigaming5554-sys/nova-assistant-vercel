@@ -1,6 +1,9 @@
 import requests
 from app.core.memory_manager import load_memory
 
+# 🌐 Ngrok se connected Ollama URL
+OLLAMA_URL = "https://bristle-overpay-consonant.ngrok-free.dev/api/generate"
+
 
 def ask_local_ai(user_message):
     memory = load_memory()
@@ -25,11 +28,11 @@ Tumhari personality:
 - Agar kuch clear na ho to politely pucho
 """
 
-    prompt = f"{system_prompt}\n\nAbhay: {user_message}\nAstra:"
+    prompt = f"{system_prompt}\n\nAbhay: {user_message}\nNova:"
 
     try:
         response = requests.post(
-            "http://127.0.0.1:11434/api/generate",
+            OLLAMA_URL,
             json={
                 "model": "llama3.2",
                 "prompt": prompt,

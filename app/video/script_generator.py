@@ -5,7 +5,7 @@ def generate_video_script(topic: str):
     prompt = f"""
 Topic: {topic}
 
-Ek cinematic funny YouTube Shorts script banao Hinglish me.
+Ek viral YouTube Shorts package banao Hinglish me.
 
 Format exactly:
 
@@ -22,6 +22,10 @@ Format exactly:
 🖼️ THUMBNAIL PROMPT:
 
 🎥 AI VIDEO PROMPT (9:16):
+
+📝 YOUTUBE DESCRIPTION:
+
+🏷️ HASHTAGS:
 """
 
-    return ask_local_ai(prompt) 
+    return ask_local_ai(prompt)

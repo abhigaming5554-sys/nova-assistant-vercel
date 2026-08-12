@@ -25,7 +25,10 @@ def ask_local_ai(user_message):
 
             response.raise_for_status()
 
-            return response.json().get("response", "😅 Ollama response nahi mila").strip()
+            return response.json().get(
+                "response",
+                "😅 Ollama response nahi mila"
+            ).strip()
 
         except Exception as e:
             return f"🎬 Ollama issue: {e}"
@@ -41,11 +44,11 @@ def ask_local_ai(user_message):
                 "X-Title": "Nova Assistant"
             },
             json={
-                "model": "openai/gpt-oss-20b:free",
+                "model": "meta-llama/llama-3.1-8b-instruct:free",
                 "messages": [
                     {
                         "role": "system",
-                        "content": "Tum Nova ho 😄 Abhay ki friendly Hinglish AI dost ho. Short, expressive aur helpful replies do."
+                        "content": "Tum Nova ho 😄 Friendly Hinglish AI dost ho."
                     },
                     {
                         "role": "user",
@@ -55,6 +58,13 @@ def ask_local_ai(user_message):
             },
             timeout=60
         )
+
+        # Better error messages
+        if response.status_code == 401:
+            return "❌ OpenRouter API key invalid hai bhai. Railway variables check karo."
+
+        if response.status_code == 429:
+            return "⏳ Nova thoda busy ho gayi 😅 1 minute baad try karo bhai."
 
         response.raise_for_status()
 

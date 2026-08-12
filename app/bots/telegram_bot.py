@@ -55,4 +55,13 @@ def handle(message):
 
 def start_telegram_bot():
     print("📱 Nova Telegram Bot started")
-    bot.infinity_polling(skip_pending=True)
+
+    # Purana webhook ya polling clear karo
+    bot.remove_webhook()
+
+    # Stable long polling
+    bot.infinity_polling(
+        skip_pending=True,
+        timeout=60,
+        long_polling_timeout=60
+    )

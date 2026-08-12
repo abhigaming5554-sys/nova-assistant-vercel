@@ -1,72 +1,73 @@
 import os
 import requests
-import json
-from pathlib import Path
 
-
-OLLAMA_URL = os.getenv(
-    "OLLAMA_URL",
-    "http://127.0.0.1:11434/api/generate"
-)
-
-MEMORY_FILE = Path("app/memory/projects.json")
-
-
-def load_memory():
-    if MEMORY_FILE.exists():
-        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-
-    return {
-        "current_project": "Nova Telegram AI Bot",
-        "last_task": "Telegram bot setup",
-        "last_file": "telegram_bot.py",
-        "pending_tasks": []
-    }
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OLLAMA_URL = os.getenv("OLLAMA_URL")
 
 
 def ask_local_ai(user_message):
-    memory = load_memory()
+    # 🎬 Video / cinematic requests → Ollama
+    video_keywords = [
+        "/video", "scene", "cinematic", "thumbnail",
+        "youtube shorts", "prompt", "story"
+    ]
 
-    system_prompt = f"""
-Tum Nova ho 😄
-Abhay ki smart, funny aur supportive AI dost ho.
+    use_ollama = any(k in user_message.lower() for k in video_keywords)
 
-Rules:
-- Hamesha Hinglish me naturally baat karo
-- Telegram chat me short aur energetic replies do
-- Friendly emoji use karo 😄🔥✨
-- Abhay coding, AI, Python aur YouTube automation par kaam karta hai
-- Kabhi "As an AI assistant" mat kehna
+    # --------------------------------
+    # 🧠 Ollama (heavy creative tasks)
+    # --------------------------------
+    if use_ollama and OLLAMA_URL:
+        try:
+            response = requests.post(
+                OLLAMA_URL,
+                headers={
+                    "Content-Type": "application/json",
+                    "ngrok-skip-browser-warning": "true"
+                },
+                json={
+                    "model": "llama3.2",
+                    "prompt": f"Tum Nova ho 😄 Hinglish me cinematic aur detailed creative output do.\n\nUser: {user_message}\nNova:",
+                    "stream": False
+                },
+                timeout=300
+            )
 
-Memory:
-- Current project: {memory['current_project']}
-- Last task: {memory['last_task']}
-- Last file: {memory['last_file']}
-"""
+            response.raise_for_status()
+            return response.json().get("response", "😅 Ollama se response nahi mila").strip()
 
-    prompt = f"{system_prompt}\n\nAbhay: {user_message}\nNova:"
+        except Exception as e:
+            print("Ollama failed:", e)
 
+    # --------------------------------
+    # ⚡ OpenRouter (normal fast chat)
+    # --------------------------------
     try:
         response = requests.post(
-            OLLAMA_URL,
+            "https://openrouter.ai/api/v1/chat/completions",
             headers={
-                "Content-Type": "application/json",
-                "ngrok-skip-browser-warning": "true"
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json"
             },
             json={
-                "model": "llama3.2",
-                "prompt": prompt,
-                "stream": False
+                "model": "meta-llama/llama-3.1-8b-instruct:free",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "Tum Nova ho 😄 Abhay ki friendly Hinglish AI dost ho. Short, fast aur expressive replies do."
+                    },
+                    {
+                        "role": "user",
+                        "content": user_message
+                    }
+                ]
             },
-            timeout=300
+            timeout=60
         )
 
         response.raise_for_status()
 
-        data = response.json()
-
-        return data.get("response", "😅 Nova ko thoda sochne do bhai...").strip()
+        return response.json()["choices"][0]["message"]["content"].strip()
 
     except Exception as e:
-        return f"Bhai AI connection me thoda issue aa gaya 😅 {e}"
+        return f"😅 Nova ko network issue aa gaya bhai: {e}"

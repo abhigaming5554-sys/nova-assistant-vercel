@@ -24,4 +24,4 @@ Format exactly:
 🎥 AI VIDEO PROMPT (9:16):
 """
 
-    return ask_local_ai(prompt)
+    return ask_local_ai(prompt) 

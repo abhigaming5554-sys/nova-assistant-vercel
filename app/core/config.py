@@ -1,2 +1,0 @@
-ASSISTANT_NAME = "Nova"
-OWNER_NAME = "Abhay"

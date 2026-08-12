@@ -54,16 +54,13 @@ def handle(message):
 
 
 def start_telegram_bot():
-    print("📱 Nova Telegram Bot started")
+    print("📱 Nova Bot started")
 
-    # Telegram webhook hatao
-    bot.remove_webhook()
+    try:
+        bot.remove_webhook()
+    except Exception as e:
+        print("Webhook warning:", e)
 
-    # Thoda wait taaki Telegram purana connection release kar de
-    import time
-    time.sleep(2)
-
-    # Stable polling
     bot.infinity_polling(
         skip_pending=True,
         timeout=30,

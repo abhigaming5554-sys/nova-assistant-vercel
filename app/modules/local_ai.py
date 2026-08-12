@@ -1,9 +1,13 @@
+import os
 import requests
 import json
 from pathlib import Path
 
-# ⚠️ Ngrok ka naya URL yahan dalna
-OLLAMA_URL = "https://bristle-overpay-consonant.ngrok-free.dev/api/generate"
+
+OLLAMA_URL = os.getenv(
+    "OLLAMA_URL",
+    "http://127.0.0.1:11434/api/generate"
+)
 
 MEMORY_FILE = Path("app/memory/projects.json")
 

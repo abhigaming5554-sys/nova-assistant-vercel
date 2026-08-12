@@ -7,17 +7,7 @@ OLLAMA_URL = os.getenv("OLLAMA_URL")
 
 def ask_local_ai(user_message):
     # 🎬 Video / cinematic requests → Ollama
-    video_keywords = [
-        "/video", "scene", "cinematic", "thumbnail",
-        "youtube shorts", "prompt", "story"
-    ]
-
-    use_ollama = any(k in user_message.lower() for k in video_keywords)
-
-    # --------------------------------
-    # 🧠 Ollama (heavy creative tasks)
-    # --------------------------------
-    if use_ollama and OLLAMA_URL:
+    if user_message.lower().startswith("/video"):
         try:
             response = requests.post(
                 OLLAMA_URL,
@@ -27,34 +17,35 @@ def ask_local_ai(user_message):
                 },
                 json={
                     "model": "llama3.2",
-                    "prompt": f"Tum Nova ho 😄 Hinglish me cinematic aur detailed creative output do.\n\nUser: {user_message}\nNova:",
+                    "prompt": user_message,
                     "stream": False
                 },
                 timeout=300
             )
 
             response.raise_for_status()
-            return response.json().get("response", "😅 Ollama se response nahi mila").strip()
+
+            return response.json().get("response", "😅 Ollama response nahi mila").strip()
 
         except Exception as e:
-            print("Ollama failed:", e)
+            return f"🎬 Ollama issue: {e}"
 
-    # --------------------------------
-    # ⚡ OpenRouter (normal fast chat)
-    # --------------------------------
+    # ⚡ Fast normal chat → OpenRouter
     try:
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://railway.app",
+                "X-Title": "Nova Assistant"
             },
             json={
-                "model": "meta-llama/llama-3.1-8b-instruct:free",
+                "model": "openai/gpt-oss-20b:free",
                 "messages": [
                     {
                         "role": "system",
-                        "content": "Tum Nova ho 😄 Abhay ki friendly Hinglish AI dost ho. Short, fast aur expressive replies do."
+                        "content": "Tum Nova ho 😄 Abhay ki friendly Hinglish AI dost ho. Short, expressive aur helpful replies do."
                     },
                     {
                         "role": "user",
@@ -67,7 +58,9 @@ def ask_local_ai(user_message):
 
         response.raise_for_status()
 
-        return response.json()["choices"][0]["message"]["content"].strip()
+        data = response.json()
+
+        return data["choices"][0]["message"]["content"].strip()
 
     except Exception as e:
         return f"😅 Nova ko network issue aa gaya bhai: {e}"

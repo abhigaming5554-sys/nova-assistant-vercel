@@ -31,23 +31,41 @@ def handle(message):
 
     text = message.text.strip()
 
-    # 🎬 Video command
+    # 🎬 Custom cinematic video command
     if text.lower().startswith("/video "):
-        topic = text[7:]
+        scene_data = text[7:]
 
         bot.reply_to(
             message,
-            "🎬 Nova tumhare liye video bana rahi hai... 😄🔥"
+            "🎬 Nova tumhara cinematic scene video bana rahi hai... 😄🔥"
         )
 
         try:
-            video_path = create_video(topic)
+            # Format: title###image_prompt###dialogue
+            parts = scene_data.split("###")
+
+            if len(parts) < 3:
+                bot.reply_to(
+                    message,
+                    "❌ Format galat hai bhai 😅\n\nUse:\n/video Scene Title###Image Prompt###Dialogue"
+                )
+                return
+
+            scene_title = parts[0].strip()
+            image_prompt = parts[1].strip()
+            dialogue = parts[2].strip()
+
+            video_path = create_video(
+                scene_title,
+                image_prompt,
+                dialogue
+            )
 
             with open(video_path, "rb") as video:
                 bot.send_video(
                     message.chat.id,
                     video,
-                    caption=f"🎬 {topic}"
+                    caption=f"🎬 {scene_title}"
                 )
 
         except Exception as e:

@@ -3,7 +3,7 @@ import telebot
 from dotenv import load_dotenv
 
 from app.modules.local_ai import ask_local_ai
-from app.video.script_generator import generate_video_script
+from app.video.video_generator import create_video
 
 load_dotenv()
 
@@ -31,18 +31,31 @@ def handle(message):
 
     text = message.text.strip()
 
-    # 🎬 Video script command
+    # 🎬 Video command
     if text.lower().startswith("/video "):
         topic = text[7:]
 
         bot.reply_to(
             message,
-            "🎬 Nova tumhare video ke liye cinematic script bana rahi hai... 😄🔥"
+            "🎬 Nova tumhare liye video bana rahi hai... 😄🔥"
         )
 
-        result = generate_video_script(topic)
+        try:
+            video_path = create_video(topic)
 
-        bot.reply_to(message, result)
+            with open(video_path, "rb") as video:
+                bot.send_video(
+                    message.chat.id,
+                    video,
+                    caption=f"🎬 {topic}"
+                )
+
+        except Exception as e:
+            bot.reply_to(
+                message,
+                f"❌ Video generate nahi hua bhai: {e}"
+            )
+
         return
 
     # 🤖 Normal AI chat

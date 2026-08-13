@@ -32,10 +32,8 @@ def ask_local_ai(user_message):
 
         except Exception as e:
             return f"🎬 Ollama issue: {e}"
-        
-        
 
-        # ⚡ Fast normal chat → OpenRouter
+    # ⚡ Fast normal chat → OpenRouter
     try:
         # 🔒 Safety check
         if not OPENROUTER_API_KEY:
@@ -54,7 +52,7 @@ def ask_local_ai(user_message):
                 "messages": [
                     {
                         "role": "system",
-                        "content": "Tum Nova ho 😄 Friendly Hinglish AI dost ho."
+                        "content": "Tum Nova ho 😄 Friendly Hinglish AI dost ho. Short aur natural replies do."
                     },
                     {
                         "role": "user",
@@ -65,12 +63,39 @@ def ask_local_ai(user_message):
             timeout=60
         )
 
-        # Better error messages
+        # ❌ Invalid API key
         if response.status_code == 401:
             return "❌ OpenRouter API key invalid hai bhai. Railway variables check karo."
 
+        # ⏳ Rate limit → Ollama fallback
         if response.status_code == 429:
-            return "⏳ Nova thoda busy ho gayi 😅 1 minute baad try karo bhai."
+            try:
+                if OLLAMA_URL:
+                    ollama_response = requests.post(
+                        OLLAMA_URL,
+                        headers={
+                            "Content-Type": "application/json",
+                            "ngrok-skip-browser-warning": "true"
+                        },
+                        json={
+                            "model": "llama3.2",
+                            "prompt": user_message,
+                            "stream": False
+                        },
+                        timeout=120
+                    )
+
+                    ollama_response.raise_for_status()
+
+                    return ollama_response.json().get(
+                        "response",
+                        "😅 Ollama fallback bhi reply nahi de paya bhai."
+                    ).strip()
+
+            except Exception:
+                pass
+
+            return "⏳ Nova thoda busy ho gayi 😅 20-30 second baad try karo bhai."
 
         response.raise_for_status()
 

@@ -1,8 +1,8 @@
 import os
 import requests
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OLLAMA_URL = os.getenv("OLLAMA_URL")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OLLAMA_URL = os.getenv("OLLAMA_URL", "")
 
 
 def ask_local_ai(user_message):
@@ -32,9 +32,15 @@ def ask_local_ai(user_message):
 
         except Exception as e:
             return f"🎬 Ollama issue: {e}"
+        
+        
 
-    # ⚡ Fast normal chat → OpenRouter
+        # ⚡ Fast normal chat → OpenRouter
     try:
+        # 🔒 Safety check
+        if not OPENROUTER_API_KEY:
+            return "❌ OPENROUTER_API_KEY set nahi hai bhai."
+
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -44,7 +50,7 @@ def ask_local_ai(user_message):
                 "X-Title": "Nova Assistant"
             },
             json={
-                "model": "meta-llama/llama-3.1-8b-instruct:free",
+                "model": "openai/gpt-oss-20b:free",
                 "messages": [
                     {
                         "role": "system",

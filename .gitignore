@@ -3,3 +3,4 @@ __pycache__/
 .env
 app/data/memory/memory.json
 screenshots/
+temp_video/

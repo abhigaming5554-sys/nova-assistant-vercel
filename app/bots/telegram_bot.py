@@ -5,6 +5,13 @@ from dotenv import load_dotenv
 from app.modules.local_ai import ask_local_ai
 from app.video.video_generator import create_video
 
+from app.memory.memory_manager import (
+    get_memory,
+    update_memory,
+    add_pending_task,
+    remove_pending_task,
+)
+
 load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN")
@@ -21,6 +28,53 @@ def start(message):
         return
 
     bot.reply_to(message, "🤖 Nova online hai 😄🔥")
+
+    # 🧠 Memory command
+    @bot.message_handler(commands=["memory"])
+    def show_memory(message):
+        if message.from_user.id != OWNER_ID:
+            return
+
+        memory = get_memory()
+
+        pending = memory.get("pending_tasks", [])
+
+        if pending:
+            tasks = "\n".join(f"• {task}" for task in pending)
+        else:
+            tasks = "• Koi pending task nahi hai."
+
+        reply = (
+            "🧠 Nova Memory\n\n"
+            f"📂 Project: {memory.get('current_project', '')}\n"
+            f"🎯 Last task: {memory.get('last_task', '')}\n"
+            f"📄 Last file: {memory.get('last_file', '')}\n\n"
+            f"⏳ Pending tasks:\n{tasks}"
+        )
+
+        bot.reply_to(message, reply)
+def show_memory(message):
+    if message.from_user.id != OWNER_ID:
+        return
+
+    memory = get_memory()
+
+    pending = memory.get("pending_tasks", [])
+
+    if pending:
+        tasks = "\n".join(f"• {task}" for task in pending)
+    else:
+        tasks = "• Koi pending task nahi hai."
+
+    reply = (
+        "🧠 Nova Memory\n\n"
+        f"📂 Project: {memory.get('current_project', '')}\n"
+        f"🎯 Last task: {memory.get('last_task', '')}\n"
+        f"📄 Last file: {memory.get('last_file', '')}\n\n"
+        f"⏳ Pending tasks:\n{tasks}"
+    )
+
+    bot.reply_to(message, reply)
 
 
 # 💬 Main message handler

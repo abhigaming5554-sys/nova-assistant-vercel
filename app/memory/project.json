@@ -1,0 +1,9 @@
+{
+  "current_project": "Nova Telegram AI Bot",
+  "last_task": "Video script generator setup",
+  "last_file": "script_generator.py",
+  "pending_tasks": [
+    "Connect Ollama with ngrok",
+    "Test Telegram video command"
+  ]
+}

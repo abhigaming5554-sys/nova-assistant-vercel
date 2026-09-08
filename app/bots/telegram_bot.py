@@ -7,15 +7,17 @@ from app.video.video_generator import create_video
 
 from app.memory.memory_manager import (
     get_memory,
-    update_memory,
-    add_pending_task,
-    remove_pending_task,
 )
 
 load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN")
-OWNER_ID = int(os.getenv("OWNER_TELEGRAM_ID", "0"))
+
+# 🌐 Public prank website
+PRANK_URL = "https://prank.abhayrathore6306.workers.dev/"
+
+if not TOKEN:
+    raise ValueError("❌ BOT_TOKEN .env file me nahi mila!")
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -23,71 +25,54 @@ bot = telebot.TeleBot(TOKEN)
 # 🚀 Start command
 @bot.message_handler(commands=["start"])
 def start(message):
-    if message.from_user.id != OWNER_ID:
-        bot.reply_to(message, "⛔ Access denied")
-        return
 
-    bot.reply_to(message, "🤖 Nova online hai 😄🔥")
-
-    # 🧠 Memory command
-    @bot.message_handler(commands=["memory"])
-    def show_memory(message):
-        if message.from_user.id != OWNER_ID:
-            return
-
-        memory = get_memory()
-
-        pending = memory.get("pending_tasks", [])
-
-        if pending:
-            tasks = "\n".join(f"• {task}" for task in pending)
-        else:
-            tasks = "• Koi pending task nahi hai."
-
-        reply = (
-            "🧠 Nova Memory\n\n"
-            f"📂 Project: {memory.get('current_project', '')}\n"
-            f"🎯 Last task: {memory.get('last_task', '')}\n"
-            f"📄 Last file: {memory.get('last_file', '')}\n\n"
-            f"⏳ Pending tasks:\n{tasks}"
-        )
-
-        bot.reply_to(message, reply)
-def show_memory(message):
-    if message.from_user.id != OWNER_ID:
-        return
-
-    memory = get_memory()
-
-    pending = memory.get("pending_tasks", [])
-
-    if pending:
-        tasks = "\n".join(f"• {task}" for task in pending)
-    else:
-        tasks = "• Koi pending task nahi hai."
-
-    reply = (
-        "🧠 Nova Memory\n\n"
-        f"📂 Project: {memory.get('current_project', '')}\n"
-        f"🎯 Last task: {memory.get('last_task', '')}\n"
-        f"📄 Last file: {memory.get('last_file', '')}\n\n"
-        f"⏳ Pending tasks:\n{tasks}"
+    bot.reply_to(
+        message,
+        "🤖 Nova online hai 😄🔥\n\n"
+        "Welcome! Ab tum Nova ko use kar sakte ho.\n\n"
+        "🌐 Prank Website:\n"
+        f"{PRANK_URL}\n\n"
+        "💬 Normal message bhejo aur Nova se baat karo.\n"
+        "🎬 Video banane ke liye /video command use karo."
     )
 
-    bot.reply_to(message, reply)
+
+# 🌐 Website link command
+@bot.message_handler(commands=["link"])
+def send_link(message):
+
+    bot.reply_to(
+        message,
+        "🌐 Nova Prank Website 😈🔥\n\n"
+        f"{PRANK_URL}"
+    )
+
+
+# 🧠 Memory command
+# Public bot hone ke baad memory ko intentionally private rakha gaya hai.
+# Isliye /memory par public user ko sensitive data nahi milega.
+@bot.message_handler(commands=["memory"])
+def show_memory(message):
+
+    bot.reply_to(
+        message,
+        "🔒 Memory command public users ke liye available nahi hai."
+    )
 
 
 # 💬 Main message handler
 @bot.message_handler(func=lambda m: True)
 def handle(message):
-    if message.from_user.id != OWNER_ID:
-        return
 
-    text = message.text.strip()
+    text = (message.text or "").strip()
+
+    if not text:
+        return
 
     # 🎬 Custom cinematic video command
     if text.lower().startswith("/video "):
-        scene_data = text[7:]
+
+        scene_data = text[7:].strip()
 
         bot.reply_to(
             message,
@@ -95,13 +80,18 @@ def handle(message):
         )
 
         try:
-            # Format: title###image_prompt###dialogue
+
+            # Format:
+            # /video Scene Title###Image Prompt###Dialogue
+
             parts = scene_data.split("###")
 
             if len(parts) < 3:
                 bot.reply_to(
                     message,
-                    "❌ Format galat hai bhai 😅\n\nUse:\n/video Scene Title###Image Prompt###Dialogue"
+                    "❌ Format galat hai bhai 😅\n\n"
+                    "Use:\n"
+                    "/video Scene Title###Image Prompt###Dialogue"
                 )
                 return
 
@@ -116,6 +106,7 @@ def handle(message):
             )
 
             with open(video_path, "rb") as video:
+
                 bot.send_video(
                     message.chat.id,
                     video,
@@ -123,26 +114,47 @@ def handle(message):
                 )
 
         except Exception as e:
+
             bot.reply_to(
                 message,
-                f"❌ Video generate nahi hua bhai: {e}"
+                f"❌ Video generate nahi hua bhai:\n{e}"
             )
 
         return
 
+
     # 🤖 Normal AI chat
-    bot.reply_to(message, "🤖 Nova soch rahi hai... 😄")
 
-    reply = ask_local_ai(text)
+    bot.reply_to(
+        message,
+        "🤖 Nova soch rahi hai... 😄"
+    )
 
-    bot.reply_to(message, reply)
+    try:
+
+        reply = ask_local_ai(text)
+
+        bot.reply_to(
+            message,
+            reply
+        )
+
+    except Exception as e:
+
+        bot.reply_to(
+            message,
+            f"❌ Nova me error aa gaya:\n{e}"
+        )
 
 
+# ▶️ Start Telegram Bot
 def start_telegram_bot():
-    print("📱 Nova Bot started")
+
+    print("📱 Nova Public Bot started 🚀")
 
     try:
         bot.remove_webhook()
+
     except Exception as e:
         print("Webhook warning:", e)
 
